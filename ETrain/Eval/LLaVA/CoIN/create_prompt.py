@@ -6,7 +6,11 @@ def parse_args():
     parser.add_argument('--results', type=str, default="./results/LLaVA/CLIT_normaltrain_testslim/Grounding/Zero_shot/merge.jsonl")
     parser.add_argument('--questions', type=str, default='./playground/Instructions_Type1/Grounding/test.json')
     parser.add_argument('--rule', default='./ETrain/Eval/LLaVA/CoIN/rule.json')
-    parser.add_argument('--rule_temp', default='CoIN_Grounding')
+    parser.add_argument(
+        '--rule_temp',
+        default='CoIN',
+        help="CoIN: use question['answer'] (VQA). CoIN_Grounding: use question['answer_bbox']; pass explicitly for Grounding eval.",
+    )
     return parser.parse_args()
 
 if __name__ == '__main__':

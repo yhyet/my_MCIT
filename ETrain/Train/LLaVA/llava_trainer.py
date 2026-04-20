@@ -284,8 +284,7 @@ def load_model_from_previous_task(model, model_args):
         from peft.utils import WEIGHTS_NAME,set_peft_model_state_dict
         print('Loading LoRA weights...')
     else:
-        sys.path.append('/home/chencheng/Code/Slim_Train')
-        from CoIN.peft import PeftModel, TaskType, get_peft_model, CoINMOELoraConfig, WEIGHTS_NAME, set_peft_model_state_dict
+        from CoIN.peft import PeftModel, WEIGHTS_NAME, set_peft_model_state_dict
             
     filename = os.path.join(previous_task_model_path, WEIGHTS_NAME)
     adapters_weights = torch.load(filename, map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
@@ -328,6 +327,49 @@ class LengthGroupedSampler(Sampler):
 
 
 class LLaVATrainer(Trainer):
+
+    def create_accelerator_and_postprocess(self):
+        """Match transformers.Trainer but set sync_each_batch for DeepSpeed ZeRO-3.
+
+        Accelerate's accumulate() uses no_sync unless sync_each_batch is True; DeepSpeed ZeRO-3
+        rejects no_sync (AssertionError). HF Trainer does not set sync_each_batch by default.
+        """
+        from accelerate import Accelerator
+        from accelerate import __version__ as accelerate_version
+        from accelerate.utils import GradientAccumulationPlugin
+
+        grad_acc_kwargs = {"num_steps": self.args.gradient_accumulation_steps}
+        if version.parse(accelerate_version) > version.parse("0.20.3"):
+            grad_acc_kwargs["sync_with_dataloader"] = False
+        hf_ds = getattr(self.args, "hf_deepspeed_config", None)
+        if hf_ds is not None and hf_ds.is_zero3():
+            grad_acc_kwargs["sync_each_batch"] = True
+        gradient_accumulation_plugin = GradientAccumulationPlugin(**grad_acc_kwargs)
+
+        self.accelerator = Accelerator(
+            dispatch_batches=self.args.dispatch_batches,
+            deepspeed_plugin=self.args.deepspeed_plugin,
+            gradient_accumulation_plugin=gradient_accumulation_plugin,
+        )
+
+        self.is_deepspeed_enabled = getattr(self.accelerator.state, "deepspeed_plugin", None) is not None
+        self.is_fsdp_enabled = getattr(self.accelerator.state, "fsdp_plugin", None) is not None
+
+        if self.is_fsdp_enabled:
+            fsdp_plugin = self.accelerator.state.fsdp_plugin
+            fsdp_plugin.limit_all_gathers = self.args.fsdp_config.get(
+                "limit_all_gathers", fsdp_plugin.limit_all_gathers
+            )
+
+        if self.is_deepspeed_enabled:
+            if getattr(self.args, "hf_deepspeed_config", None) is None:
+                from transformers.deepspeed import HfTrainerDeepSpeedConfig
+
+                ds_plugin = self.accelerator.state.deepspeed_plugin
+
+                ds_plugin.hf_ds_config = HfTrainerDeepSpeedConfig(ds_plugin.hf_ds_config.config)
+                ds_plugin.deepspeed_config = ds_plugin.hf_ds_config.config
+                ds_plugin.hf_ds_config.trainer_config_process(self.args)
 
     def _get_train_sampler(self) -> Optional[torch.utils.data.Sampler]:
         if self.train_dataset is None or not has_length(self.train_dataset):

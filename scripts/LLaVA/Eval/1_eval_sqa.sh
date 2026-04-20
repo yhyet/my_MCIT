@@ -12,7 +12,7 @@ else
 fi
 
 if [ ! -n "$2" ] ;then
-    MODELPATH='./checkpoints/Instruction/Only_Pretrain_1.5/ScienceQA/llava-1.5-7b-lora'
+    MODELPATH='./checkpoints/LLaVA/CoIN/ScienceQA_llava_lora'
 else
     MODELPATH=$2
 fi
@@ -22,9 +22,9 @@ RESULT_DIR="./results/CoIN/LLaVA/ScienceQA"
 for IDX in $(seq 0 $((CHUNKS-1))); do
     CUDA_VISIBLE_DEVICES=${GPULIST[$IDX]} python -m ETrain.Eval.LLaVA.CoIN.model_vqa_science \
         --model-path $MODELPATH \
-        --model-base ./checkpoints/LLaVA/Vicuna/vicuna-7b-v1.5 \
+        --model-base ../cl_dataset/vicuna-7b-v1.5 \
         --question-file ./playground/Instructions_Original/ScienceQA/test.json \
-        --image-folder ./cl_dataset \
+        --image-folder ../cl_dataset \
         --answers-file $RESULT_DIR/$STAGE/${CHUNKS}_${IDX}.jsonl \
         --num-chunks $CHUNKS \
         --chunk-idx $IDX \
@@ -45,12 +45,13 @@ for IDX in $(seq 0 $((CHUNKS-1))); do
 done
 
 python -m ETrain.Eval.LLaVA.CoIN.eval_science_qa \
-    --base-dir ./cl_dataset/ScienceQA \
+    --base-dir ../cl_dataset/ScienceQA \
     --result-file $output_file \
     --output-file $RESULT_DIR/$STAGE/output.jsonl \
     --output-result $RESULT_DIR/$STAGE/output_result.jsonl \
 
 python -m ETrain.Eval.LLaVA.CoIN.create_prompt \
     --rule ./ETrain/Eval/LLaVA/CoIN/rule.json \
+    --rule_temp CoIN \
     --questions ./playground/Instructions_Original/ScienceQA/test.json \
-    --results $output_file \
+    --results $output_file

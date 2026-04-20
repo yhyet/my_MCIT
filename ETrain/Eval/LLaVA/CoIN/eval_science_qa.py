@@ -7,7 +7,12 @@ import random
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--base-dir', type=str, default = './cl_dataset/ScienceQA')
+    parser.add_argument(
+        '--base-dir',
+        type=str,
+        default='../cl_dataset/ScienceQA',
+        help='Directory containing problems.json and pid_splits.json (same parent as image-folder ../cl_dataset).',
+    )
     parser.add_argument('--result-file', type=str, default='./results/CoIN/Qwen/ScienceQA/Finetune/merge.jsonl')
     parser.add_argument('--output-file', type=str, default= './results/CoIN/Qwen/ScienceQA/Finetune/output.jsonl')
     parser.add_argument('--output-result', type=str, default= './results/CoIN/Qwen/ScienceQA/Finetune/output_result.jsonl')

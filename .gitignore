@@ -3,6 +3,7 @@ __pycache__
 *.pyc
 *.egg-info
 dist
+.venv/
 
 # Log
 *.log
@@ -23,11 +24,11 @@ dist
 wandb
 output
 images_to_show
-playground
+playground/
 FigurePlot
 
-results/*
-checkpoints
+results/
+checkpoints/
 cl_dataset
 ckpts*
 

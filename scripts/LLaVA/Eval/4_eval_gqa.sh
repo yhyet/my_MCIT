@@ -12,7 +12,7 @@ else
 fi
 
 if [ ! -n "$2" ] ;then
-    MODELPATH='./checkpoints/Instruction/Only_Pretrain_1.5/GQA/llava-1.5-7b-lora'
+    MODELPATH='./checkpoints/LLaVA/CoIN/GQA_llava_lora'
 else
     MODELPATH=$2
 fi
@@ -22,9 +22,9 @@ RESULT_DIR="./results/CoIN/LLaVA/GQA"
 for IDX in $(seq 0 $((CHUNKS-1))); do
     CUDA_VISIBLE_DEVICES=${GPULIST[$IDX]} python -m ETrain.Eval.LLaVA.CoIN.model_gqa \
         --model-path $MODELPATH \
-        --model-base ./checkpoints/LLaVA/Vicuna/vicuna-7b-v1.5 \
+        --model-base ../cl_dataset/vicuna-7b-v1.5 \
         --question-file ./playground/Instructions_Original/GQA/test.json \
-        --image-folder ./cl_dataset \
+        --image-folder ../cl_dataset \
         --answers-file $RESULT_DIR/$STAGE/${CHUNKS}_${IDX}.jsonl \
         --num-chunks $CHUNKS \
         --chunk-idx $IDX \

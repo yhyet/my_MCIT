@@ -11,7 +11,7 @@ deepspeed --include localhost:0,1,2,3,4,5,6,7 \
 output_file=$RESULT_DIR/$1/merge.jsonl
 
 python -m ETrain.Eval.LLaVA.CoIN.eval_science_qa \
-    --base-dir ./cl_dataset/ScienceQA \
+    --base-dir ../cl_dataset/ScienceQA \
     --result-file $output_file \
     --output-file $RESULT_DIR/$1/output.jsonl \
     --output-result $RESULT_DIR/$1/output_result.jsonl \

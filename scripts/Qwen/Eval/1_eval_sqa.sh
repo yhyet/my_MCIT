@@ -43,7 +43,7 @@ for IDX in $(seq 0 $((CHUNKS-1))); do
 done
 
 python -m ETrain.Eval.LLaVA.CoIN.eval_science_qa \
-    --base-dir ./cl_dataset/ScienceQA \
+    --base-dir ../cl_dataset/ScienceQA \
     --result-file $output_file \
     --output-file $RESULT_DIR/$STAGE/output.jsonl \
     --output-result $RESULT_DIR/$STAGE/output_result.jsonl \

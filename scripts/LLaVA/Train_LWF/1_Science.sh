@@ -13,7 +13,7 @@ deepspeed --include localhost:2,3,4,5,6,7 --master_port 29600 ETrain/Train/LLaVA
     --deepspeed ./scripts/zero2.json \
     --lora_enable True --lora_r 128 --lora_alpha 256 --mm_projector_lr 2e-5 \
     --LWF \
-    --model_name_or_path ./vicuna-7b-v1.5 \
+    --model_name_or_path ./checkpoints/LLaVA/Vicuna/vicuna-7b-v1.5 \
     --pretrain_mm_mlp_adapter ./checkpoints/LLaVA/Vicuna/vicuna-7b-v1.5-projector/mm_projector.bin \
     --version $PROMPT_VERSION \
     --data_path ./playground/Instructions_slim_0.4/ScienceQA/train.json \
